@@ -24,7 +24,7 @@ module.exports = async function handler(req,res){
     const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;
     if(!token)return res.status(500).json({error:'AI_GATEWAY_API_KEY is missing from this deployment.'});
 
-    const model=process.env.VOICE_COACH_MODEL||'inclusionai/ling-3.0-tiny-free';
+    const model=process.env.VOICE_COACH_MODEL||'minimax/minimax-m2.7-free';
     const r=await fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
