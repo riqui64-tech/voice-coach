@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Voice Coach — Clean Build</title>
+<style>
+:root{color-scheme:dark;--bg:#06111d;--panel:#0d1a29;--line:#213951;--text:#f6f8fb;--muted:#9db0c3;--accent:#7aa8ff;--good:#59d6a0;--bad:#ff9494}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#102b50 0,#071320 40%,#030810 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.top h1{margin:0;font-size:29px}.top p{margin:5px 0 0;color:var(--muted)}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}.dot{width:10px;height:10px;border-radius:50%;background:#607182}.dot.live{background:var(--good);box-shadow:0 0 0 5px rgba(89,214,160,.12)}.grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.card{background:rgba(13,26,41,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.2)}.label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#83a4c1;font-weight:800}.controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#06111d}.btn.secondary{background:#18314b;color:var(--text);border:1px solid #2c4a69}.btn:disabled{opacity:.45;cursor:not-allowed}.livebox,.textarea,.select{width:100%;background:#07131f;border:1px solid #294862;color:var(--text);border-radius:12px;padding:12px}.livebox{min-height:54px;border-style:dashed;color:#cbd8e4}.textarea{min-height:135px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.output{display:grid;gap:13px}.hero{background:linear-gradient(145deg,#133152,#10223a);border:1px solid #335978;border-radius:16px;padding:18px}.answer{font-size:22px;line-height:1.5;margin-top:8px}.mini{background:#081622;border:1px solid #203a52;border-radius:14px;padding:14px}.mini p{margin:7px 0 0;line-height:1.5;color:#dce7ef}.mini ul{margin:8px 0 0;padding-left:20px}.mini li{margin:6px 0}.stop{margin-top:12px;color:var(--good);font-weight:900}.muted{color:var(--muted)}.error{color:var(--bad);font-size:13px}.foot{margin-top:12px;color:#7790a8;font-size:12px;line-height:1.5}@media(max-width:850px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div><h1>Voice Coach — Clean Build</h1><p>Hear the interviewer. Answer simply like an experienced pro. Go deeper only when needed.</p></div>
+    <div class="status"><span id="dot" class="dot"></span><span id="status">Idle</span></div>
+  </header>
+  <div class="grid">
+    <section class="card">
+      <div class="label">Interviewer input</div>
+      <div class="controls">
+        <button id="start" class="btn">Start Listening</button>
+        <button id="stop" class="btn secondary" disabled>Stop</button>
+        <button id="clear" class="btn secondary">Clear</button>
+      </div>
+      <div id="interim" class="livebox">Microphone is idle.</div>
+      <div style="height:14px"></div>
+      <div class="label">Detected question</div>
+      <textarea id="question" class="textarea" placeholder="The newest interviewer question appears here. You can type one too."></textarea>
+      <div class="row">
+        <select id="role" class="select"><option>Kustomer TechOps</option><option>D. E. Shaw Systems Admin</option><option>General IT / TechOps</option></select>
+        <select id="depth" class="select"><option value="simple">Simple pro first</option><option value="technical">More technical</option><option value="deep">Deep interview mode</option></select>
+      </div>
+      <button id="coach" class="btn" style="width:100%;margin-top:10px">Coach This Question</button>
+      <div id="error" class="error"></div>
+      <div class="foot">Practice tool: keep answers truthful and use the response to strengthen your own reasoning rather than read a hidden script during a live interview.</div>
+    </section>
+    <section class="card output">
+      <div class="hero"><div class="label">Say this</div><div id="say" class="answer">Press Start Listening, then let the interviewer finish the question.</div><div id="stopHere" class="stop" hidden>STOP HERE — let them ask the next question.</div></div>
+      <div class="mini"><div class="label">Pro thought process</div><p id="thought">Listen → understand intent → answer simply → deepen only if asked</p></div>
+      <div class="mini"><div class="label">What they're testing</div><p id="testing">Waiting for a question</p></div>
+      <div id="technicalBox" class="mini" hidden><div class="label">If they push technical</div><ul id="technical"></ul></div>
+      <div id="followBox" class="mini" hidden><div class="label">Likely follow-up</div><p id="follow"></p></div>
+    </section>
+  </div>
+</main>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const start=$('#start'),stop=$('#stop'),clear=$('#clear'),coach=$('#coach');
+const question=$('#question'),interim=$('#interim'),error=$('#error'),dot=$('#dot'),status=$('#status');
+let recognition=null,autoTimer=null,busy=false;
+function setListening(on){dot.classList.toggle('live',on);status.textContent=on?'Listening':'Idle';start.disabled=on;stop.disabled=!on;if(!on&&interim.textContent==='Listening for the interviewer…')interim.textContent='Microphone is idle.'}
+function render(data){$('#say').textContent=data.sayThis||'No answer returned.';$('#thought').textContent=data.thoughtProcess||'';$('#testing').textContent=data.testing||'';$('#stopHere').hidden=!data.stopHere;const tech=Array.isArray(data.technical)?data.technical:[];$('#technicalBox').hidden=!tech.length;$('#technical').innerHTML=tech.map(x=>'<li>'+escapeHtml(x)+'</li>').join('');$('#followBox').hidden=!data.followUp;$('#follow').textContent=data.followUp||''}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function askCoach(text){const q=(text||question.value).trim();if(!q||busy)return;busy=true;coach.disabled=true;coach.textContent='Thinking…';error.textContent='';$('#say').textContent='Building the simplest strong answer…';try{const r=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,role:$('#role').value,depth:$('#depth').value})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Coach request failed');render(data)}catch(e){error.textContent=e.message||'Something went wrong';$('#say').textContent='The coach could not answer. Check the server AI configuration.'}finally{busy=false;coach.disabled=false;coach.textContent='Coach This Question'}}
+start.onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){error.textContent='Speech recognition is not supported here. Use Chrome/Edge or type the question.';return}error.textContent='';recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';recognition.onstart=()=>{setListening(true);interim.textContent='Listening for the interviewer…'};recognition.onend=()=>setListening(false);recognition.onerror=e=>{error.textContent='Microphone error: '+(e.error||'unknown');setListening(false)};recognition.onresult=e=>{let finalText='',partial='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t;else partial+=t}interim.textContent=partial||'Listening…';if(finalText.trim()){const clean=finalText.trim();question.value=clean;clearTimeout(autoTimer);autoTimer=setTimeout(()=>askCoach(clean),350)}};recognition.start()};
+stop.onclick=()=>recognition?.stop();clear.onclick=()=>{question.value='';interim.textContent='Microphone is idle.';error.textContent='';render({sayThis:'Press Start Listening, then let the interviewer finish the question.',technical:[],thoughtProcess:'Listen → understand intent → answer simply → deepen only if asked',testing:'Waiting for a question',followUp:'',stopHere:false})};coach.onclick=()=>askCoach();
+</script>
+</body>
+</html>
