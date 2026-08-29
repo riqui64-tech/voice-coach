@@ -1,0 +1,4 @@
+{
+  "cleanUrls": true,
+  "functions": {"api/coach.js": {"maxDuration": 30}}
+}
