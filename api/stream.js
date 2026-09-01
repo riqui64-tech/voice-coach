@@ -1,15 +1,17 @@
 const SYSTEM = `You are Voice Coach, an elite practice assistant for technical interview practice.
 
 PRIMARY GOAL
-Give the simplest spoken answer that proves experienced understanding. Sound like a capable coworker, not a textbook, chatbot, or memorized script.
+Give the fastest useful spoken answer that proves experienced understanding. Sound like a capable coworker, not a textbook, chatbot, or memorized script.
 
 BEHAVIOR
 - Answer the newest interviewer input directly, including follow-ups, corrections, challenges, small talk, scheduling, role/company discussion, and behavioral questions.
-- Default SAY THIS length: roughly 15-30 seconds spoken. Expand only when the question genuinely needs it or depth requests it.
-- Lead with the answer. Do not ramble, over-qualify, or dump technical detail before it is needed.
+- TURBO DEFAULT: the SAY THIS answer should usually be 1-3 sentences and about 8-15 seconds spoken. Get to the answer immediately.
+- If requested depth is technical, still keep SAY THIS concise and put extra specifics in the technical list.
+- Only Deep mode may justify a longer answer.
+- Never ramble, over-qualify, or dump technical detail before it is needed.
 - Use technical terminology only when it improves clarity.
 - Never invent direct experience, employers, projects, metrics, tools used in production, or responsibilities. If exact experience is unknown, say so naturally and bridge from transferable fundamentals.
-- For troubleshooting use: scope -> impact -> recent change -> evidence -> isolate -> safest useful fix -> verify.
+- For troubleshooting use: scope -> impact -> evidence -> isolate -> safest useful fix -> verify.
 - For behavioral answers use: context -> action -> reasoning -> result, briefly.
 - For security-sensitive scenarios prioritize identity verification, least privilege, device trust, auditability, and safe escalation.
 - For urgent/executive support restore productivity safely first, then investigate root cause.
@@ -29,23 +31,16 @@ const LUNA_FAST = 'openai/gpt-5.6-luna-fast';
 const SOL_FAST = 'openai/gpt-5.6-sol-fast';
 const FREE_FALLBACK = 'minimax/minimax-m2.7-free';
 
-function chooseModel(question, depth) {
-  if (process.env.VOICE_COACH_MODEL) return { model: process.env.VOICE_COACH_MODEL, tier: 'custom' };
-  if (depth === 'deep') return { model: SOL_FAST, tier: 'sol-fast' };
-
-  const q = question.toLowerCase();
-  let score = depth === 'technical' ? 1 : 0;
-  if (question.length > 260) score += 1;
-  const hard = /(architecture|design a|designing|trade-?off|root cause|security incident|company[- ]wide|multiple systems|integration|api\b|webhook|saml|scim|conditional access|certificate|network segmentation|packet capture|automation|automate|script|powershell|bash|python|migration|migrate|scale|high availability|disaster recovery|conflicting evidence|logs.*contradict|zero trust)/i;
-  if (hard.test(q)) score += 2;
-  return score >= 3 ? { model: SOL_FAST, tier: 'sol-fast' } : { model: LUNA_FAST, tier: 'luna-fast' };
+function chooseModel(depth) {
+  if (process.env.VOICE_COACH_MODEL) return process.env.VOICE_COACH_MODEL;
+  return depth === 'deep' ? SOL_FAST : LUNA_FAST;
 }
 
 function compactContext(input) {
   if (!Array.isArray(input)) return '';
   return input.slice(-4).map((x, i) => {
-    const q = String(x?.question || '').slice(0, 500);
-    const a = String(x?.answer || '').slice(0, 700);
+    const q = String(x?.question || '').slice(0, 420);
+    const a = String(x?.answer || '').slice(0, 520);
     return `${i + 1}. Interviewer: ${q}\nCandidate: ${a}`;
   }).filter(Boolean).join('\n');
 }
@@ -68,6 +63,7 @@ async function openGatewayStream({ token, model, question, role, depth, recentCo
     body: JSON.stringify({
       model,
       stream: true,
+      max_tokens: depth === 'deep' ? 420 : 280,
       messages: [
         { role: 'system', content: SYSTEM },
         { role: 'user', content: userContent }
@@ -85,10 +81,10 @@ module.exports = async function handler(req, res) {
   const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
   if (!token) return res.status(500).send('AI_GATEWAY_API_KEY is missing from this deployment.');
 
-  const chosen = chooseModel(question, depth);
+  const chosenModel = chooseModel(depth);
   const models = [...new Set([
-    chosen.model,
-    chosen.model === SOL_FAST ? LUNA_FAST : null,
+    chosenModel,
+    chosenModel === SOL_FAST ? LUNA_FAST : null,
     FREE_FALLBACK
   ].filter(Boolean))];
 
@@ -116,7 +112,6 @@ module.exports = async function handler(req, res) {
       } catch {
         lastError = text || lastError;
       }
-
       console.warn('Voice Coach model attempt failed:', model, attempt.status, lastError);
     }
 
