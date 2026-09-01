@@ -3,139 +3,75 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Voice Coach — Final Build</title>
+<title>Voice Coach 4.0 — Interview Mode</title>
 <style>
-:root{color-scheme:dark;--bg:#06111d;--panel:#0d1a29;--line:#213951;--text:#f6f8fb;--muted:#9db0c3;--accent:#7aa8ff;--good:#59d6a0;--warn:#ffd479;--bad:#ff9494}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#102b50 0,#071320 40%,#030810 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.top h1{margin:0;font-size:29px}.top p{margin:5px 0 0;color:var(--muted)}.statusBox{display:grid;gap:6px;justify-items:end}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}.dot{width:10px;height:10px;border-radius:50%;background:#607182}.dot.live{background:var(--good);box-shadow:0 0 0 5px rgba(89,214,160,.12)}.latency{font-size:12px;color:#8facbf}.grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.card{background:rgba(13,26,41,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.2)}.label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#83a4c1;font-weight:800}.controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#06111d}.btn.secondary{background:#18314b;color:var(--text);border:1px solid #2c4a69}.btn:disabled{opacity:.45;cursor:not-allowed}.livebox,.textarea,.select{width:100%;background:#07131f;border:1px solid #294862;color:var(--text);border-radius:12px;padding:12px}.livebox{min-height:58px;border-style:dashed;color:#cbd8e4}.textarea{min-height:135px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.output{display:grid;gap:13px}.hero{background:linear-gradient(145deg,#133152,#10223a);border:1px solid #335978;border-radius:16px;padding:18px;min-height:190px}.answer{font-size:22px;line-height:1.5;margin-top:8px;white-space:pre-wrap}.mini{background:#081622;border:1px solid #203a52;border-radius:14px;padding:14px}.mini p{margin:7px 0 0;line-height:1.5;color:#dce7ef}.mini ul{margin:8px 0 0;padding-left:20px}.mini li{margin:6px 0}.stop{margin-top:12px;color:var(--good);font-weight:900}.error{color:var(--bad);font-size:13px;margin-top:8px}.hint{color:var(--warn);font-size:12px;margin-top:7px}.foot{margin-top:12px;color:#7790a8;font-size:12px;line-height:1.5}.pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.pill{display:inline-block;border:1px solid #2b4963;border-radius:999px;padding:4px 8px;font-size:11px;color:#9eb8ca}.pill.good{border-color:#285844;color:#8de0b7}@media(max-width:850px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.row{grid-template-columns:1fr}.statusBox{justify-items:start}.top{flex-direction:column}.answer{font-size:20px}.btn{min-height:46px}}
+:root{color-scheme:dark;--bg:#06111d;--panel:#0d1a29;--line:#213951;--text:#f6f8fb;--muted:#9db0c3;--accent:#7aa8ff;--good:#59d6a0;--warn:#ffd479;--bad:#ff9494;--lock:#b39cff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#102b50 0,#071320 40%,#030810 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1180px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.top h1{margin:0;font-size:28px}.top p{margin:5px 0 0;color:var(--muted)}.statusBox{display:grid;gap:6px;justify-items:end}.hud{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800}.hudDot{width:11px;height:11px;border-radius:50%;background:#607182}.hud.listening{color:var(--good)}.hud.listening .hudDot{background:var(--good);box-shadow:0 0 0 5px rgba(89,214,160,.12)}.hud.thinking{color:var(--warn)}.hud.thinking .hudDot{background:var(--warn)}.hud.locked{color:var(--lock)}.hud.locked .hudDot{background:var(--lock);box-shadow:0 0 0 5px rgba(179,156,255,.1)}.latency{font-size:12px;color:#8facbf}.grid{display:grid;grid-template-columns:.88fr 1.12fr;gap:18px}.card{background:rgba(13,26,41,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.2)}.label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#83a4c1;font-weight:800}.controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#06111d}.btn.secondary{background:#18314b;color:var(--text);border:1px solid #2c4a69}.btn.lock{background:#8f78ff;color:white}.btn.good{background:var(--good);color:#06111d}.btn:disabled{opacity:.45;cursor:not-allowed}.livebox,.textarea,.select{width:100%;background:#07131f;border:1px solid #294862;color:var(--text);border-radius:12px;padding:12px}.livebox{min-height:58px;border-style:dashed;color:#cbd8e4}.textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.output{display:grid;gap:13px}.hero{background:linear-gradient(145deg,#133152,#10223a);border:1px solid #335978;border-radius:16px;padding:18px;min-height:190px;position:relative}.answer{font-size:22px;line-height:1.48;margin-top:8px;white-space:pre-wrap}.whisper{font-size:24px;line-height:1.45;font-weight:750;margin-top:8px}.fullAnswer{margin-top:13px;border-top:1px solid #2b4963;padding-top:13px}.mini{background:#081622;border:1px solid #203a52;border-radius:14px;padding:14px}.mini p{margin:7px 0 0;line-height:1.5;color:#dce7ef}.mini ul{margin:8px 0 0;padding-left:20px}.mini li{margin:6px 0}.stopCue{margin-top:12px;color:var(--good);font-weight:900}.error{color:var(--bad);font-size:13px;margin-top:8px}.hint{color:var(--warn);font-size:12px;margin-top:7px;line-height:1.45}.foot{margin-top:12px;color:#7790a8;font-size:12px;line-height:1.5}.pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.pill{display:inline-block;border:1px solid #2b4963;border-radius:999px;padding:4px 8px;font-size:11px;color:#9eb8ca}.pill.good{border-color:#285844;color:#8de0b7}.pill.locked{border-color:#61539e;color:#c5b8ff}.turnbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:14px;border-radius:14px;background:#0a1725;border:1px solid #203a52}.turntext{font-weight:850}.history{display:grid;gap:8px;max-height:245px;overflow:auto}.historyItem{border:1px solid #1d344b;background:#07131f;border-radius:11px;padding:10px}.historyItem strong{font-size:12px;color:#8facbf}.historyItem div{margin-top:4px;font-size:13px;line-height:1.4;color:#dce7ef}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a111a;border:1px solid #35516b;border-bottom-width:2px;border-radius:6px;padding:2px 6px;font-size:11px;color:#dbe7ef}@media(max-width:850px){.grid{grid-template-columns:1fr}.wrap{padding:14px}.row{grid-template-columns:1fr}.statusBox{justify-items:start}.top{flex-direction:column}.whisper{font-size:21px}.btn{min-height:48px}.hero{min-height:170px}.controls .btn{flex:1 1 140px}.turnbar .btn{flex:1 1 150px}}
 </style>
 </head>
 <body>
 <main class="wrap">
 <header class="top">
-<div><h1>Voice Coach — Final Build</h1><p>Fast first answer, smart model routing, follow-up memory, and deeper detail only when needed.</p></div>
-<div class="statusBox"><div class="status"><span id="dot" class="dot"></span><span id="status">Idle</span></div><div id="latency" class="latency">First-response latency: —</div></div>
+<div><h1>Voice Coach 4.0 — Interview Mode</h1><p>Listen to the interviewer, get the cue, then lock the mic while you answer.</p></div>
+<div class="statusBox"><div id="hud" class="hud"><span class="hudDot"></span><span id="hudText">Idle</span></div><div id="latency" class="latency">First-response latency: —</div></div>
 </header>
 <div class="grid">
 <section class="card">
-<div class="label">Interviewer input</div>
-<div class="controls"><button id="start" class="btn">Start Listening</button><button id="stop" class="btn secondary" disabled>Stop</button><button id="clear" class="btn secondary">New Interview</button></div>
+<div class="label">Interview control</div>
+<div class="controls"><button id="start" class="btn">Start Interview</button><button id="listenNow" class="btn good" disabled>Listen Now</button><button id="stop" class="btn secondary" disabled>Stop</button><button id="clear" class="btn secondary">New Interview</button></div>
+<div class="turnbar"><span id="turnText" class="turntext">Ready to start.</span><span id="shortcutHint" class="hint">Press <span class="kbd">Space</span> or <span class="kbd">F8</span> when you're ready for the next interviewer question.</span></div>
+<div style="height:12px"></div>
+<div class="label">Live microphone</div>
 <div id="interim" class="livebox">Microphone is idle.</div>
-<div class="hint">Voice mode waits about 0.8 seconds after the interviewer stops speaking, then streams the answer.</div>
+<div class="hint">Interview Mode locks the microphone after each captured question. Your own answer will not be transcribed until you re-arm listening.</div>
 <div style="height:14px"></div>
 <div class="label">Detected question</div>
-<textarea id="question" class="textarea" placeholder="The newest interviewer question appears here. You can type one too."></textarea>
-<div class="row">
-<select id="role" class="select"><option>Kustomer TechOps</option><option>D. E. Shaw Systems Admin</option><option>General IT / TechOps</option></select>
-<select id="depth" class="select"><option value="simple">Simple pro first</option><option value="technical">More technical</option><option value="deep">Deep interview mode</option></select>
-</div>
-<button id="coach" class="btn" style="width:100%;margin-top:10px">Coach This Question</button>
+<textarea id="question" class="textarea" placeholder="The newest interviewer question appears here. You can also type one manually."></textarea>
+<div class="row"><select id="role" class="select"><option>Kustomer TechOps</option><option>D. E. Shaw Systems Admin</option><option>General IT / TechOps</option></select><select id="depth" class="select"><option value="simple">Turbo simple</option><option value="technical">Technical backup</option><option value="deep">Deep / Sol Fast</option></select></div>
+<button id="coach" class="btn" style="width:100%;margin-top:10px">Coach Typed Question</button>
 <div id="error" class="error"></div>
-<div class="foot">Practice tool: keep answers truthful and use the response to strengthen your own reasoning rather than read a hidden script during a live interview.</div>
+<div class="foot">Practice tool: keep answers truthful and use the cue to strengthen your own reasoning rather than read a hidden script during a live interview.</div>
 </section>
 <section class="card output">
-<div class="hero"><div class="label">Say this</div><div id="say" class="answer">Press Start Listening, then let the interviewer finish the question.</div><div class="pillrow"><span id="phase" class="pill">Ready</span><span id="modelUsed" class="pill good">Model: —</span><span id="memory" class="pill">Context: 0 turns</span></div><div id="stopHere" class="stop" hidden>STOP HERE — let them ask the next question.</div></div>
-<div class="mini"><div class="label">Pro thought process</div><p id="thought">Listen → understand intent → answer simply → deepen only if asked</p></div>
+<div class="hero"><div class="label">Whisper cue</div><div id="whisper" class="whisper">Start the interview and let the interviewer finish the question.</div><div id="fullAnswerWrap" class="fullAnswer" hidden><div class="label">Full answer</div><div id="say" class="answer"></div></div><div class="pillrow"><span id="phase" class="pill">Ready</span><span id="modelUsed" class="pill good">Model: —</span><span id="memory" class="pill">Context: 0 turns</span><span id="micState" class="pill locked">Mic: idle</span></div><div id="stopHere" class="stopCue" hidden>STOP HERE — answer naturally in your own words.</div></div>
+<div class="mini"><div class="label">Pro thought process</div><p id="thought">Listen → understand intent → simple answer → deepen only if asked</p></div>
 <div class="mini"><div class="label">What they're testing</div><p id="testing">Waiting for a question</p></div>
 <div id="technicalBox" class="mini" hidden><div class="label">If they push technical</div><ul id="technical"></ul></div>
 <div id="followBox" class="mini" hidden><div class="label">Likely follow-up</div><p id="follow"></p></div>
+<div class="mini"><div class="label">Interview history</div><div id="history" class="history"><div class="historyItem"><strong>No turns yet</strong><div>Your completed Q&A turns will appear here.</div></div></div></div>
 </section>
 </div>
 </main>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
-const start=$('#start'),stop=$('#stop'),clear=$('#clear'),coach=$('#coach');
-const question=$('#question'),interim=$('#interim'),error=$('#error'),dot=$('#dot'),status=$('#status'),phase=$('#phase'),latency=$('#latency'),modelUsed=$('#modelUsed'),memory=$('#memory');
-let recognition=null,endpointTimer=null,requestController=null,manualStop=true,listening=false;
+const start=$('#start'),listenNow=$('#listenNow'),stop=$('#stop'),clear=$('#clear'),coach=$('#coach');
+const question=$('#question'),interim=$('#interim'),error=$('#error'),hud=$('#hud'),hudText=$('#hudText'),phase=$('#phase'),latency=$('#latency'),modelUsed=$('#modelUsed'),memory=$('#memory'),micState=$('#micState'),turnText=$('#turnText');
+let recognition=null,endpointTimer=null,requestController=null,manualStop=true,listening=false,locked=false,interviewActive=false,restartAfterEnd=false;
 let finalBuffer='',partialBuffer='',lastSent='',sendStartedAt=0,firstChunkSeen=false,requestSeq=0;
 let recentContext=[];
-const ENDPOINT_MS=800;
+const ENDPOINT_MS=350;
 
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
-function setStatus(text,on=false){status.textContent=text;dot.classList.toggle('live',on)}
-function setControls(){start.disabled=listening;stop.disabled=!listening}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setHud(mode,text){hud.className='hud '+(mode||'');hudText.textContent=text}
+function setControls(){start.disabled=interviewActive;stop.disabled=!interviewActive;listenNow.disabled=!interviewActive||listening}
 function updateMemory(){memory.textContent='Context: '+recentContext.length+' turn'+(recentContext.length===1?'':'s')}
-function clearDetails(){
-  $('#thought').textContent='Listening → intent → concise answer → deeper detail if asked';
-  $('#testing').textContent='Analyzing interviewer intent…';
-  $('#technicalBox').hidden=true;$('#technical').innerHTML='';$('#followBox').hidden=true;$('#follow').textContent='';$('#stopHere').hidden=true;
-}
-function renderDetails(data){
-  $('#thought').textContent=data.thoughtProcess||'';$('#testing').textContent=data.testing||'';
-  const tech=Array.isArray(data.technical)?data.technical:[];$('#technicalBox').hidden=!tech.length;$('#technical').innerHTML=tech.map(x=>'<li>'+escapeHtml(x)+'</li>').join('');
-  $('#followBox').hidden=!data.followUp;$('#follow').textContent=data.followUp||'';$('#stopHere').hidden=!data.stopHere;
-}
-function abortCurrent(msg='Question changed — updating…'){
-  if(requestController){requestController.abort();requestController=null;requestSeq++}
-  if(phase.textContent==='Streaming answer')phase.textContent=msg;
-}
-function currentUtterance(){return (finalBuffer+' '+partialBuffer).replace(/\s+/g,' ').trim()}
-function scheduleEndpoint(){
-  clearTimeout(endpointTimer);
-  endpointTimer=setTimeout(()=>{
-    const candidate=currentUtterance();
-    if(candidate.length>=4 && candidate!==lastSent){
-      finalBuffer=candidate;partialBuffer='';streamCoach(candidate,true);
-    }
-  },ENDPOINT_MS);
-}
-function parseDetails(text){
-  if(!text)return null;
-  try{return JSON.parse(text.trim())}catch{}
-  const s=text.indexOf('{'),e=text.lastIndexOf('}');
-  if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1))}catch{}}
-  return null;
-}
-async function streamCoach(text,fromVoice=false){
-  const q=(text||question.value).trim();if(!q||q===lastSent)return;
-  lastSent=q;question.value=q;abortCurrent();
-  const mySeq=++requestSeq;requestController=new AbortController();sendStartedAt=performance.now();firstChunkSeen=false;
-  error.textContent='';clearDetails();$('#say').textContent='';phase.textContent='Streaming answer';modelUsed.textContent='Model: routing…';setStatus(fromVoice?'Answering':'Thinking',listening);coach.disabled=true;coach.textContent='Streaming…';
-  try{
-    const r=await fetch('/api/stream',{method:'POST',headers:{'Content-Type':'application/json'},signal:requestController.signal,body:JSON.stringify({question:q,role:$('#role').value,depth:$('#depth').value,recentContext})});
-    if(!r.ok){const t=await r.text();throw new Error(t||'Coach request failed')}
-    if(mySeq!==requestSeq)return;
-    modelUsed.textContent='Model: '+(r.headers.get('X-Voice-Tier')||'AI');
-    if(!r.body)throw new Error('Streaming is unavailable in this browser.');
-    const reader=r.body.getReader(),decoder=new TextDecoder();let full='',answerShown='',detailsText='';const delimiter='<<<DETAILS_JSON>>>';
-    while(true){
-      const {done,value}=await reader.read();if(done)break;if(mySeq!==requestSeq){reader.cancel();return}
-      const chunk=decoder.decode(value,{stream:true});if(!chunk)continue;
-      if(!firstChunkSeen){firstChunkSeen=true;latency.textContent='First-response latency: '+Math.round(performance.now()-sendStartedAt)+' ms'}
-      full+=chunk;const idx=full.indexOf(delimiter);
-      answerShown=idx>=0?full.slice(0,idx).trim():full;detailsText=idx>=0?full.slice(idx+delimiter.length).trim():'';$('#say').textContent=answerShown.trimStart();
-    }
-    if(mySeq!==requestSeq)return;
-    const idx=full.indexOf(delimiter);const finalAnswer=(idx>=0?full.slice(0,idx):full).trim();$('#say').textContent=finalAnswer||'No answer returned.';
-    if(idx>=0){const parsed=parseDetails(full.slice(idx+delimiter.length));if(parsed)renderDetails(parsed)}
-    if(finalAnswer){recentContext.push({question:q,answer:finalAnswer});recentContext=recentContext.slice(-4);updateMemory()}
-    phase.textContent='Answer ready';setStatus(listening?'Listening':'Idle',listening);
-    finalBuffer='';partialBuffer='';
-  }catch(e){if(e.name!=='AbortError'){error.textContent=e.message||'Something went wrong';if(!$('#say').textContent)$('#say').textContent='The coach could not answer this turn.';phase.textContent='Error'}}
-  finally{if(mySeq===requestSeq){requestController=null;coach.disabled=false;coach.textContent='Coach This Question'}}
-}
-function startRecognition(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){error.textContent='Speech recognition is not supported here. Use Chrome/Edge or type the question.';return}
-  manualStop=false;error.textContent='';recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
-  recognition.onstart=()=>{listening=true;setControls();setStatus('Listening',true);interim.textContent='Listening for the interviewer…';phase.textContent='Listening'};
-  recognition.onresult=e=>{
-    let newlyFinal='',newPartial='';
-    for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)newlyFinal+=' '+t;else newPartial+=' '+t}
-    if(newlyFinal.trim())finalBuffer=(finalBuffer+' '+newlyFinal).replace(/\s+/g,' ').trim();
-    partialBuffer=newPartial.trim();const heard=currentUtterance();
-    if(heard){interim.textContent=heard;question.value=heard;if(requestController)abortCurrent();phase.textContent='Detecting pause';scheduleEndpoint()}
-  };
-  recognition.onerror=e=>{if(e.error!=='aborted'&&e.error!=='no-speech')error.textContent='Microphone error: '+(e.error||'unknown')};
-  recognition.onend=()=>{listening=false;setControls();if(!manualStop){setTimeout(()=>{try{recognition.start()}catch{}},200)}else{setStatus('Idle',false);interim.textContent='Microphone is idle.';phase.textContent='Ready'}};
-  recognition.start();
-}
-start.onclick=startRecognition;
-stop.onclick=()=>{manualStop=true;clearTimeout(endpointTimer);try{recognition?.stop()}catch{};abortCurrent('Stopped')};
-coach.onclick=()=>streamCoach(question.value,false);
-clear.onclick=()=>{
-  abortCurrent('Ready');clearTimeout(endpointTimer);finalBuffer='';partialBuffer='';lastSent='';recentContext=[];question.value='';interim.textContent=listening?'Listening for the interviewer…':'Microphone is idle.';error.textContent='';latency.textContent='First-response latency: —';modelUsed.textContent='Model: —';updateMemory();$('#say').textContent='Press Start Listening, then let the interviewer finish the question.';phase.textContent=listening?'Listening':'Ready';renderDetails({thoughtProcess:'Listen → understand intent → answer simply → deepen only if asked',testing:'Waiting for a question',technical:[],followUp:'',stopHere:false});
-};
-setControls();updateMemory();
+function updateHistory(){const box=$('#history');if(!recentContext.length){box.innerHTML='<div class="historyItem"><strong>No turns yet</strong><div>Your completed Q&A turns will appear here.</div></div>';return}box.innerHTML=recentContext.map((x,i)=>'<div class="historyItem"><strong>Q'+(i+1)+'</strong><div>'+escapeHtml(x.question)+'</div></div>').join('')}
+function firstSentence(text){const clean=String(text||'').trim();if(!clean)return'';const m=clean.match(/^(.+?[.!?])(?:\s|$)/);return m?m[1]:clean.split(/\n/)[0]}
+function clearDetails(){ $('#thought').textContent='Listening → intent → concise answer → deeper detail if asked';$('#testing').textContent='Analyzing interviewer intent…';$('#technicalBox').hidden=true;$('#technical').innerHTML='';$('#followBox').hidden=true;$('#follow').textContent='';$('#stopHere').hidden=true }
+function renderDetails(data){$('#thought').textContent=data.thoughtProcess||'';$('#testing').textContent=data.testing||'';const tech=Array.isArray(data.technical)?data.technical:[];$('#technicalBox').hidden=!tech.length;$('#technical').innerHTML=tech.map(x=>'<li>'+escapeHtml(x)+'</li>').join('');$('#followBox').hidden=!data.followUp;$('#follow').textContent=data.followUp||'';$('#stopHere').hidden=!data.stopHere}
+function abortCurrent(msg='Updating…'){if(requestController){requestController.abort();requestController=null;requestSeq++}if(phase.textContent==='Streaming answer')phase.textContent=msg}
+function currentUtterance(){return(finalBuffer+' '+partialBuffer).replace(/\s+/g,' ').trim()}
+function parseDetails(text){if(!text)return null;try{return JSON.parse(text.trim())}catch{}const s=text.indexOf('{'),e=text.lastIndexOf('}');if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1))}catch{}}return null}
+function safeStopRecognition(){try{recognition?.stop()}catch{}}
+function lockForAnswer(){locked=true;restartAfterEnd=false;clearTimeout(endpointTimer);safeStopRecognition();micState.textContent='Mic: LOCKED';turnText.textContent='YOUR TURN — answer freely. Press Space/F8 or Listen Now when you are ready.';setHud('locked','Your Turn — Mic Locked');phase.textContent='Your turn';listenNow.disabled=false}
+function armListening(){if(!interviewActive)return;locked=false;finalBuffer='';partialBuffer='';lastSent='';question.value='';interim.textContent='Listening for the interviewer…';micState.textContent='Mic: listening';turnText.textContent='INTERVIEWER TURN — listening for the next question.';setHud('listening','Interviewer Turn — Listening');phase.textContent='Listening';restartAfterEnd=true;startRecognitionInstance()}
+function scheduleEndpoint(){clearTimeout(endpointTimer);endpointTimer=setTimeout(()=>{const candidate=currentUtterance();if(candidate.length>=4&&candidate!==lastSent){finalBuffer=candidate;partialBuffer='';lockForAnswer();streamCoach(candidate,true)}},ENDPOINT_MS)}
+async function streamCoach(text,fromVoice=false){const q=(text||question.value).trim();if(!q)return;lastSent=q;question.value=q;abortCurrent();const mySeq=++requestSeq;requestController=new AbortController();sendStartedAt=performance.now();firstChunkSeen=false;error.textContent='';clearDetails();$('#whisper').textContent='';$('#say').textContent='';$('#fullAnswerWrap').hidden=true;phase.textContent='Streaming answer';modelUsed.textContent='Model: routing…';setHud('thinking','Coach Answering');coach.disabled=true;coach.textContent='Streaming…';try{const r=await fetch('/api/stream',{method:'POST',headers:{'Content-Type':'application/json'},signal:requestController.signal,body:JSON.stringify({question:q,role:$('#role').value,depth:$('#depth').value,recentContext})});if(!r.ok){const t=await r.text();throw new Error(t||'Coach request failed')}if(mySeq!==requestSeq)return;modelUsed.textContent='Model: '+(r.headers.get('X-Voice-Tier')||'AI');if(!r.body)throw new Error('Streaming is unavailable in this browser.');const reader=r.body.getReader(),decoder=new TextDecoder();let full='',answerShown='',detailsText='';const delimiter='<<<DETAILS_JSON>>>';while(true){const {done,value}=await reader.read();if(done)break;if(mySeq!==requestSeq){reader.cancel();return}const chunk=decoder.decode(value,{stream:true});if(!chunk)continue;if(!firstChunkSeen){firstChunkSeen=true;latency.textContent='First-response latency: '+Math.round(performance.now()-sendStartedAt)+' ms'}full+=chunk;const idx=full.indexOf(delimiter);answerShown=idx>=0?full.slice(0,idx).trim():full;detailsText=idx>=0?full.slice(idx+delimiter.length).trim():'';$('#whisper').textContent=firstSentence(answerShown);$('#say').textContent=answerShown.trim();$('#fullAnswerWrap').hidden=answerShown.trim()===firstSentence(answerShown)}const idx=full.indexOf(delimiter);const finalAnswer=(idx>=0?full.slice(0,idx):full).trim();$('#whisper').textContent=firstSentence(finalAnswer)||'No answer returned.';$('#say').textContent=finalAnswer;$('#fullAnswerWrap').hidden=!finalAnswer||finalAnswer===firstSentence(finalAnswer);if(idx>=0){const parsed=parseDetails(full.slice(idx+delimiter.length));if(parsed)renderDetails(parsed)}if(finalAnswer){recentContext.push({question:q,answer:finalAnswer});recentContext=recentContext.slice(-6);updateMemory();updateHistory()}phase.textContent='Answer ready';if(fromVoice){setHud('locked','Your Turn — Mic Locked');micState.textContent='Mic: LOCKED';turnText.textContent='YOUR TURN — answer freely. Press Space/F8 or Listen Now when ready.';$('#stopHere').hidden=false}else{setHud('',interviewActive?'Ready':'Idle')}}catch(e){if(e.name!=='AbortError'){error.textContent=e.message||'Something went wrong';if(!$('#whisper').textContent)$('#whisper').textContent='The coach could not answer this turn.';phase.textContent='Error'}}finally{if(mySeq===requestSeq){requestController=null;coach.disabled=false;coach.textContent='Coach Typed Question'}}}
+function startRecognitionInstance(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){error.textContent='Speech recognition is not supported here. Use Chrome/Edge or type the question.';return}recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';recognition.onstart=()=>{listening=true;setControls();micState.textContent='Mic: listening';setHud('listening','Interviewer Turn — Listening');interim.textContent='Listening for the interviewer…'};recognition.onresult=e=>{if(locked)return;let newlyFinal='',newPartial='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)newlyFinal+=' '+t;else newPartial+=' '+t}if(newlyFinal.trim())finalBuffer=(finalBuffer+' '+newlyFinal).replace(/\s+/g,' ').trim();partialBuffer=newPartial.trim();const heard=currentUtterance();if(heard){interim.textContent=heard;question.value=heard;phase.textContent='Detecting pause';scheduleEndpoint()}};recognition.onerror=e=>{if(e.error!=='aborted'&&e.error!=='no-speech')error.textContent='Microphone error: '+(e.error||'unknown')};recognition.onend=()=>{listening=false;setControls();if(interviewActive&&!locked&&restartAfterEnd){setTimeout(()=>{if(interviewActive&&!locked)startRecognitionInstance()},180)}else if(locked){micState.textContent='Mic: LOCKED'}else{micState.textContent='Mic: idle'}};try{recognition.start()}catch{}}
+function beginInterview(){interviewActive=true;manualStop=false;locked=false;error.textContent='';setControls();armListening()}
+function endInterview(){interviewActive=false;locked=false;restartAfterEnd=false;clearTimeout(endpointTimer);safeStopRecognition();abortCurrent('Stopped');setHud('','Idle');micState.textContent='Mic: idle';turnText.textContent='Interview stopped.';phase.textContent='Stopped';setControls()}
+start.onclick=beginInterview;listenNow.onclick=armListening;stop.onclick=endInterview;coach.onclick=()=>streamCoach(question.value,false);clear.onclick=()=>{endInterview();finalBuffer='';partialBuffer='';lastSent='';recentContext=[];question.value='';interim.textContent='Microphone is idle.';error.textContent='';latency.textContent='First-response latency: —';modelUsed.textContent='Model: —';updateMemory();updateHistory();$('#whisper').textContent='Start the interview and let the interviewer finish the question.';$('#say').textContent='';$('#fullAnswerWrap').hidden=true;phase.textContent='Ready';turnText.textContent='Ready to start.';renderDetails({thoughtProcess:'Listen → understand intent → answer simply → deepen only if asked',testing:'Waiting for a question',technical:[],followUp:'',stopHere:false})};document.addEventListener('keydown',e=>{const tag=(document.activeElement?.tagName||'').toLowerCase();if(tag==='textarea'||tag==='input'||tag==='select')return;if((e.code==='Space'||e.code==='F8')&&interviewActive&&!listening){e.preventDefault();armListening()}});setControls();updateMemory();updateHistory();
 </script>
 </body>
 </html>
