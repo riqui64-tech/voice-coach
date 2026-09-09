@@ -1,0 +1,9 @@
+{
+  "name": "voice-coach",
+  "private": true,
+  "engines": {"node": ">=22"},
+  "dependencies": {
+    "openai": "^7.8.0",
+    "ws": "^8.18.3"
+  }
+}
