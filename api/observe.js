@@ -1,5 +1,5 @@
-const PRIMARY=process.env.VOICE_OBSERVER_MODEL||'openai/gpt-5.6-luna-fast';
-const FALLBACK='minimax/minimax-m2.7-free';
+const PRIMARY=process.env.VOICE_OBSERVER_MODEL||'openai/gpt-5.6-luna';
+const FALLBACK='openai/gpt-5.4';
 
 const SYSTEM=`You are the live conversation observer for a candidate-side D. E. Shaw Systems Administrator interview coach.
 You receive a rolling transcript plus the newest speech segment. Your job is NOT to answer the interview question. Your job is to decide whether the newest turn requires a candidate response.
@@ -26,7 +26,7 @@ async function callGateway(token,model,prompt){
   return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{
     method:'POST',
     headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({model,stream:false,max_tokens:170,temperature:0,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
+    body:JSON.stringify({model,stream:false,max_tokens:170,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
   });
 }
 function parse(text){try{return JSON.parse(text)}catch{}const s=text.indexOf('{'),e=text.lastIndexOf('}');if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1))}catch{}}return null}
