@@ -26,7 +26,7 @@ async function callGateway(token,model,prompt){
   return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{
     method:'POST',
     headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({model,stream:false,max_tokens:170,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
+    body:JSON.stringify({model,stream:false,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
   });
 }
 function parse(text){try{return JSON.parse(text)}catch{}const s=text.indexOf('{'),e=text.lastIndexOf('}');if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1))}catch{}}return null}
