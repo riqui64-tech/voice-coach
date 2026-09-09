@@ -1,30 +1,32 @@
 const PRIMARY=process.env.VOICE_OBSERVER_MODEL||'openai/gpt-5.6-luna-fast';
 const FALLBACK='minimax/minimax-m2.7-free';
 
-const SYSTEM=`You are the live conversation observer for a candidate-side technical interview coach.
-You receive a rolling transcript plus the newest speech segment. Your job is NOT to answer the interview question. Your job is to decide whether the newest interviewer turn requires a candidate response.
+const SYSTEM=`You are the live conversation observer for a candidate-side D. E. Shaw Systems Administrator interview coach.
+You receive a rolling transcript plus the newest speech segment. Your job is NOT to answer the interview question. Your job is to decide whether the newest turn requires a candidate response.
 
 Return ONLY compact JSON:
 {"speaker":"INTERVIEWER"|"CANDIDATE"|"UNKNOWN","action":"ANSWER"|"WAIT"|"IGNORE","question":"string","confidence":0.0,"reason":"short string"}
 
 Behavior rules:
-- Follow the entire conversation. Short prompts can depend on earlier context: "why?", "what next?", "and Jamf?", "how so?", "walk me through that", "what would you check first?" are valid interviewer questions when context makes them meaningful.
-- ANSWER whenever the interviewer asks a substantive question, requests an example/explanation, presents a scenario and asks what the candidate would do, or clearly hands the floor to the candidate for a substantive response.
-- WAIT only when the newest turn is obviously unfinished or the interviewer is still building the question.
-- IGNORE greetings, acknowledgments, filler, company explanation without an ask, and the candidate's own answer.
+- Follow the whole conversation. Short prompts depend on prior context: "why?", "what next?", "how so?", "what if that fails?", "what would you check first?", "and DNS?", "and Active Directory?" can be valid interviewer questions.
+- ANSWER when the interviewer asks a substantive question, requests an example/explanation, presents a scenario and expects the candidate to respond, or clearly hands over the floor.
+- WAIT when the newest interviewer turn is obviously unfinished, trails off, ends in a setup phrase, or sounds like the interviewer is still building the scenario.
+- IGNORE greetings, acknowledgments, filler, company explanation with no ask, and the candidate's own answer.
+- Candidate language often begins with first-person execution language such as: "I would", "I'd", "I usually", "my approach", "the first thing I'd check", "at Integris", "at Skadden", "at Maimonides".
+- Interviewer language often frames hypotheticals, asks for reasoning, probes sequence, or tests troubleshooting: "walk me through", "let's say", "suppose", "why", "what next", "how would you know", "what if".
 - Speaker detection is soft. Infer from wording and context; never require certainty.
-- If the interviewer asks multiple tightly related questions in one turn, cluster them into one natural question that preserves all required parts.
-- If unsure between ANSWER and IGNORE and there is a reasonable chance the interviewer expects a response, prefer ANSWER.
-- If action=ANSWER, question must contain enough context to answer correctly. Do not over-summarize away technical scenario details.
+- If multiple tightly related questions are asked in one turn, cluster them into one natural question preserving every required part.
+- If action=ANSWER, question must contain enough context to answer correctly. Preserve important technical details such as Windows vs Linux, one user vs many, exact symptoms, authentication vs authorization, network vs application, and urgency.
 - If action is WAIT or IGNORE, question may be empty.
 - confidence is 0 to 1.
-- reason is a very short debug explanation.`;
+- reason is a very short debug explanation.
+- Prefer ANSWER over IGNORE only when there is a real indication the interviewer expects the candidate to respond. Do not answer ordinary candidate speech just because it contains technical terms.`;
 
 async function callGateway(token,model,prompt){
   return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{
     method:'POST',
     headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({model,stream:false,max_tokens:150,temperature:0,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
+    body:JSON.stringify({model,stream:false,max_tokens:170,temperature:0,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})
   });
 }
 function parse(text){try{return JSON.parse(text)}catch{}const s=text.indexOf('{'),e=text.lastIndexOf('}');if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1))}catch{}}return null}
@@ -34,8 +36,8 @@ module.exports=async function handler(req,res){
   if(!latest||typeof latest!=='string')return res.status(400).json({error:'latest is required'});
   const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;
   if(!token)return res.status(500).json({error:'AI gateway token missing'});
-  const qa=Array.isArray(recentContext)?recentContext.slice(-4).map((x,i)=>`${i+1}. Interviewer: ${String(x?.question||'').slice(0,280)}\nCandidate: ${String(x?.answer||'').slice(0,360)}`).join('\n'):'';
-  const prompt=[qa&&`Recent answered turns:\n${qa}`,rollingTranscript&&`Rolling live transcript:\n${String(rollingTranscript).slice(-5000)}`,`Newest speech segment:\n${latest}`].filter(Boolean).join('\n\n');
+  const qa=Array.isArray(recentContext)?recentContext.slice(-5).map((x,i)=>`${i+1}. Interviewer: ${String(x?.question||'').slice(0,320)}\nCandidate: ${String(x?.answer||'').slice(0,420)}`).join('\n'):'';
+  const prompt=[qa&&`Recent answered turns:\n${qa}`,rollingTranscript&&`Rolling live transcript:\n${String(rollingTranscript).slice(-6000)}`,`Newest speech segment:\n${latest}`].filter(Boolean).join('\n\n');
   let last='Observer unavailable';
   for(const model of [PRIMARY,FALLBACK]){
     try{
