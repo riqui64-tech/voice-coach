@@ -1,5 +1,5 @@
-const PRIMARY=process.env.VOICE_OBSERVER_MODEL||'openai/gpt-5.6-luna-fast';
-const FALLBACK='minimax/minimax-m2.7-free';
+const PRIMARY=process.env.VOICE_OBSERVER_MODEL||'openai/gpt-5.6-luna';
+const FALLBACK='openai/gpt-5.4';
 
 async function probe(token,model){
   const started=Date.now();
@@ -7,7 +7,7 @@ async function probe(token,model){
     const r=await fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{
       method:'POST',
       headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({model,stream:false,max_tokens:2,temperature:0,messages:[{role:'user',content:'Reply OK'}]})
+      body:JSON.stringify({model,stream:false,max_tokens:2,messages:[{role:'user',content:'Reply OK'}]})
     });
     const latencyMs=Date.now()-started;
     if(!r.ok){
