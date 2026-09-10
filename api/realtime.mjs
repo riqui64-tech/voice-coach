@@ -32,7 +32,7 @@ Style:
 - Leave room for follow-up instead of over-explaining.`;
 
 function safeSend(ws, obj) {
-  if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(obj));
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj));
 }
 
 function buildInput(question, depth) {
@@ -69,8 +69,41 @@ wss.on('connection', (browser) => {
   let activeQuestion = '';
   let activeDepth = 'simple';
   let connectedAt = Date.now();
+  let pendingAfterActive = null;
 
   const fail = (message) => safeSend(browser, { type: 'ai.error', error: String(message || 'AI WebSocket error') });
+
+  function createResponse(question, depth) {
+    activeQuestion = question;
+    activeDepth = depth;
+    const payload = {
+      type: 'response.create',
+      model: MODEL,
+      instructions: INSTRUCTIONS,
+      input: buildInput(question, depth),
+      stream: true,
+    };
+    if (lastCompletedResponseId) payload.previous_response_id = lastCompletedResponseId;
+    ai.send(payload);
+  }
+
+  function steerActive(question, depth) {
+    if (!activeResponseId) return false;
+    activeQuestion = question;
+    activeDepth = depth;
+    try {
+      ai.send({
+        type: 'response.steer',
+        previous_response_id: activeResponseId,
+        input: buildInput(question, depth),
+      });
+      safeSend(browser, { type: 'ai.steer.sent', responseId: activeResponseId, question });
+      return true;
+    } catch (e) {
+      fail(e?.message || e);
+      return false;
+    }
+  }
 
   ai.on('error', (err) => fail(err?.message || err));
   ai.on('response.created', (event) => {
@@ -90,14 +123,26 @@ wss.on('connection', (browser) => {
       safeSend(browser, { type: 'ai.done', responseId: id, status: 'completed' });
       activeResponseId = null;
       activeQuestion = '';
+      if (pendingAfterActive) {
+        const next = pendingAfterActive;
+        pendingAfterActive = null;
+        createResponse(next.question, next.depth);
+      }
     } else if (event.type === 'response.incomplete' || event.type === 'response.failed') {
-      safeSend(browser, { type: 'ai.done', responseId: event.response?.id || activeResponseId, status: event.type, error: event.response?.error || event.response?.incomplete_details || null });
+      const error = event.response?.error || event.response?.incomplete_details || event.type;
+      safeSend(browser, { type: 'ai.error', responseId: event.response?.id || activeResponseId, error: typeof error === 'string' ? error : JSON.stringify(error) });
       activeResponseId = null;
       activeQuestion = '';
+      if (pendingAfterActive) {
+        const next = pendingAfterActive;
+        pendingAfterActive = null;
+        createResponse(next.question, next.depth);
+      }
     } else if (event.type === 'response.steer.accepted') {
       safeSend(browser, { type: 'ai.steer.accepted', responseId: activeResponseId });
     } else if (event.type === 'response.steer.failed') {
       safeSend(browser, { type: 'ai.steer.failed', responseId: activeResponseId, error: event.error || null });
+      if (activeQuestion) pendingAfterActive = { question: activeQuestion, depth: activeDepth };
     }
   });
 
@@ -114,28 +159,12 @@ wss.on('connection', (browser) => {
     if (!question) return;
     const depth = ['simple', 'technical', 'deep'].includes(msg.depth) ? msg.depth : 'simple';
 
-    if (msg.type === 'steer' && activeResponseId) {
-      activeQuestion = question;
-      activeDepth = depth;
-      ai.send({
-        type: 'response.steer',
-        previous_response_id: activeResponseId,
-        input: buildInput(question, depth),
-      });
+    if (activeResponseId) {
+      if (!steerActive(question, depth)) pendingAfterActive = { question, depth };
       return;
     }
 
-    activeQuestion = question;
-    activeDepth = depth;
-    const payload = {
-      type: 'response.create',
-      model: MODEL,
-      instructions: INSTRUCTIONS,
-      input: buildInput(question, depth),
-      stream: true,
-    };
-    if (lastCompletedResponseId) payload.previous_response_id = lastCompletedResponseId;
-    ai.send(payload);
+    createResponse(question, depth);
   });
 
   browser.on('close', () => {
