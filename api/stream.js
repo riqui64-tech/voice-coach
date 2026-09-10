@@ -1,53 +1,212 @@
-const KUSTOMER_RESUME=`KUSTOMER TECHOPS RESUME — ONLY RESUME SOURCE OF TRUTH
-Professional profile: Systems Administrator with 5+ years in Mac-first IT operations, identity, Google Workspace, SaaS administration, endpoint security, automation, self-service documentation, and secure lifecycle workflows.
-Core: Okta, SAML, SCIM, MFA, Google Workspace, Slack, Zoom, 1Password, Notion, macOS, Jamf Pro, Apple Business Manager, ADE, FileVault, patching, Okta Workflows, Google Apps Script, APIs/webhooks, AI-assisted workflows, access reviews, audit evidence, least privilege, VPN, VLAN, DNS, DHCP.
-Braze: own Google Workspace, Okta, Jamf Pro, Slack, Zoom, 1Password and Notion for 250+ employees; automated JML with Okta Workflows/SCIM/Apps Script reducing provisioning ~90 to 20 minutes; manage 200+ Macs; reduced repeat support 30%; Security partnership and 98%+ encryption/critical-patch compliance; AI-assisted triage/knowledge drafting cut documentation time 40%; SaaS catalog identified $45K annual savings.
-Electric: administered Google Workspace, Okta, Slack, Zoom and macOS for 150+ users; identity/SSO/endpoint/VPN/collaboration support with 95%+ SLA; Mac deployment/recovery cut setup time 50%; SOPs/runbooks; VPN/Wi-Fi/DNS/DHCP/VLAN troubleshooting.
-Maimonides: L1/L2 macOS/Windows, user accounts, conferencing, printers and business apps; owned incidents through resolution.
-TRUTH RULE: This is the only resume source. Never use another resume. Never invent experience.`;
+const RESUME = `MEDIDATA CONSULTANT RESUME — ONLY RESUME SOURCE OF TRUTH
+Ricardo Flores — Brooklyn, NY
+Senior eCOA Implementation & Enablement Consultant.
+8+ years supporting global Phase I-IV clinical trials, including 6+ years leading eCOA implementation, solution consultation, and enablement.
 
-const STORIES=[
-{id:'jml',label:'JML automation — 90→20 min',domain:'Automation & Identity',strengths:['automation','ownership','process improvement'],rx:/(automat|onboard|offboard|joiner|mover|leaver|provision|process|efficien|accomplishment|proud)/i,signals:[/90 minutes/i,/20 minutes/i,/joiner/i,/okta workflows/i],facts:'Automated JML with Okta Workflows, SCIM and Apps Script; provisioning ~90 to 20 minutes and recurring access errors eliminated.'},
-{id:'tickets',label:'Repeat tickets — 30% reduction',domain:'Support & Self-Service',strengths:['root cause','documentation','proactive support'],rx:/(ticket|self.?service|documentation|repeat|prevent|knowledge|root cause|proactive)/i,signals:[/30%/i,/repeat support/i,/self-service/i],facts:'Analyzed ticket patterns, published task-based Notion guides and self-service fixes; repeat support volume fell 30%.'},
-{id:'security',label:'Security partnership — 98%+',domain:'Security & Compliance',strengths:['judgment','security partnership','audit readiness'],rx:/(security|audit|least privilege|compliance|risk|access review|patch|encryption|filevault)/i,signals:[/98%/i,/access review/i,/audit evidence/i],facts:'Partnered with Security on access reviews, endpoint compliance, audit evidence and remediation; encryption/critical-patch compliance reached 98%+.'},
-{id:'macs',label:'Mac fleet — 200+',domain:'Apple & Endpoint',strengths:['endpoint ownership','lifecycle management','remote support'],rx:/(jamf|mac|macos|apple business|ade|device|laptop|endpoint|filevault|zero.?touch|shipping|repair)/i,signals:[/200\+? mac/i,/apple business manager/i,/jamf pro/i],facts:'Managed 200+ Macs via ABM and Jamf: zero-touch enrollment, profiles, FileVault escrow, patching, repairs, shipping and lifecycle controls.'},
-{id:'ai',label:'AI triage — 40% faster docs',domain:'AI & Automation',strengths:['innovation','responsible AI','controls'],rx:/(ai|artificial intelligence|triage|knowledge draft|responsible use|innovation)/i,signals:[/40%/i,/ai-assisted/i,/human approval/i],facts:'Built AI-assisted triage and knowledge drafting with human approval, cutting documentation time 40% while protecting confidential data.'},
-{id:'saas',label:'SaaS catalog — $45K savings',domain:'SaaS Governance',strengths:['business impact','governance','cost ownership'],rx:/(saas|license|vendor|renewal|cost|saving|shadow it|catalog|contract|spend)/i,signals:[/45k/i,/\$45/i,/saas catalog/i],facts:'Built SaaS catalog with owners, renewals, contracts, SSO status, sensitivity and users; removed redundancy and identified $45K savings.'},
-{id:'deploy',label:'Mac setup — 50% faster',domain:'Onboarding & Operations',strengths:['standardization','onboarding','operational improvement'],rx:/(new hire|first day|deployment|recovery|setup time|readiness|standardiz|runbook)/i,signals:[/50%/i,/deployment and recovery/i],facts:'At Electric, standardized Mac deployment/recovery, cutting new-hire setup time 50% and improving first-day readiness.'},
-{id:'sla',label:'Support — 95%+ SLA',domain:'Support Operations',strengths:['prioritization','communication','incident ownership'],rx:/(urgent|priority|prioritiz|sla|incident|pressure|escalat|executive|user impact)/i,signals:[/95%/i,/sla attainment/i],facts:'At Electric, supported 150+ users across identity, SSO, endpoint, VPN and collaboration while maintaining 95%+ SLA.'},
-{id:'network',label:'VPN/DNS/DHCP/VLAN',domain:'Networking',strengths:['troubleshooting','evidence gathering','escalation'],rx:/(vpn|wifi|wi-fi|dns|dhcp|vlan|network|connectivity|internet|remote access)/i,signals:[/vpn/i,/dns/i,/dhcp/i,/vlan/i],facts:'At Electric, troubleshot VPN, Wi-Fi, DNS, DHCP and VLAN issues and coordinated escalations with network/security teams.'}
-];
+CORE: eCOA solution design and implementation; ePRO, eDiary, ClinRO, ObsRO, PerfO; Patient Experience technology; protocol and assessment analysis; validated instrument implementation; licensing and translations; multilingual/global deployment; EDC integration; requirements/configuration management; UAT/validation; release readiness; mid-study updates/change control; SOP/work-instruction development; defect/enhancement management; product adoption/optimization; consultant mentoring and quality oversight.
 
-function historyText(c){return Array.isArray(c)?c.map(x=>`${x?.question||''}\n${x?.answer||''}`).join('\n').toLowerCase():''}
-function usedIds(c){const t=historyText(c);return STORIES.filter(s=>s.signals.some(r=>r.test(t))).map(s=>s.id)}
-function revisit(q){return /(go back|earlier|before|you mentioned|that example|same project|previous|tell me more|expand on that)/i.test(q)}
-function pickStory(q,c){const behavioral=/(tell me about|give me an example|describe a time|time when|challenge|difficult|mistake|conflict|accomplishment|proud|initiative|ownership|project|strength|impact)/i.test(q);const used=new Set(usedIds(c));const cand=STORIES.filter(s=>s.rx.test(q));if(!cand.length&&!behavioral)return null;if(revisit(q)){const x=cand.find(s=>used.has(s.id));if(x)return{...x,reused:true}}const fresh=cand.find(s=>!used.has(s.id));if(fresh)return{...fresh,reused:false};if(cand[0])return{...cand[0],reused:used.has(cand[0].id)};const fallback=STORIES.find(s=>!used.has(s.id))||STORIES[0];return{...fallback,reused:used.has(fallback.id)}}
-function resumeMatch(q,story){if(story)return{level:'Direct',label:story.label};const t=q.toLowerCase();const direct=['okta','saml','scim','mfa','google workspace','slack','zoom','1password','notion','jamf','macos','apple business manager','filevault','patch','vpn','dns','dhcp','vlan','api','webhook','onboarding','offboarding','saas'];const f=direct.find(x=>t.includes(x));return f?{level:'Direct',label:f}:{level:'General bridge',label:'resume-adjacent fundamentals'}}
-function interviewerType(q){const t=q.toLowerCase();if(/why (kustomer|this role)|tell me about yourself|walk me through your background|salary|hybrid|availability|motivat/.test(t))return'Recruiter';if(/security|least privilege|audit|mfa|access review|confidential|risk|compliance|filevault/.test(t))return'Security';if(/priorit|ownership|roadmap|stakeholder|team|mentor|process|measure|metric|trade.?off|business impact/.test(t))return'Hiring Manager';if(/strategy|scale|cost|saving|leadership|organization|company-wide|vision/.test(t))return'Leadership';return'TechOps Engineer'}
-function compactContext(c){return Array.isArray(c)?c.slice(-6).map((x,i)=>`${i+1}. Interviewer: ${String(x?.question||'').slice(0,420)}\nCandidate: ${String(x?.answer||'').slice(0,520)}`).join('\n'):''}
+SIGNANT HEALTH — Senior eCOA Implementation Consultant — Mar 2023-Present
+Lead eCOA implementation, enablement, and strategic consultation for global Phase I-IV trials across oncology, rare disease, neurology, immunology, and respiratory. Translate protocols, schedules of activities, endpoint strategies, instrument requirements, and data-management specifications into eCOA designs. Support ePRO/eDiary/ClinRO/ObsRO/PerfO across web, tablet, provisioned and BYOD environments. Portfolio: 30+ studies, 25 countries, 20 languages, ~15,000 planned participants. Guide requirements, solution design, licensing, translations, configuration review, UAT, deployment and optimization. Evaluate visit schedules, branching, reminders, compliance rules, scoring, data transfers, role permissions and integration dependencies. Facilitate design workshops and trusted-advisor consultation. Design/deliver training and reusable guides, configuration examples, assessments, QC checklists and troubleshooting resources. Review builds for protocol alignment, usability, data integrity and production readiness. Lead release-readiness and mid-study change assessments. Partner with Product/Engineering/Quality/Data Management/Support on defects and enhancements. Mentor AICs, ICs and Senior ICs. Improved first-cycle build acceptance 78% to 91%; reduced recurring configuration defects 32%.
 
-const SYSTEM=`You are Voice Coach, an elite Kustomer TechOps interview practice assistant.
-${KUSTOMER_RESUME}
+CLARIO — eCOA Implementation Consultant — Jun 2020-Mar 2023
+Managed end-to-end eCOA implementations from protocol analysis through launch/stabilization; 25+ Phase II/III studies including multinational/multilingual deployments. Facilitated requirements workshops. Converted protocols/endpoints into requirements for assessments, schedules, notifications, compliance, roles, devices and data transfers. Maintained traceability from protocol to specifications, configuration and test evidence. Coordinated validated COA licensing, copyright, translations, electronic-format review and sponsor approval. Partnered with EDC/data-management teams on subject/visit/assessment flows and reconciliation. Delivered demos, design reviews, administrator training, UAT preparation, train-the-trainer and go-live readiness. Guided risk-based UAT across workflows, errors, permissions, notifications, data integrity and devices. Triaged defects with reproduction steps, expected/actual behavior, evidence, affected users and clinical/operational impact. Managed amendments, instrument changes, translations, country additions and data changes. Contributed to SOPs, work instructions, standards, validation templates and playbooks. Reduced average client UAT duration 20%; achieved 95% on-time launches.
 
-GOAL: Give the fastest useful spoken answer that sounds like an experienced coworker while staying truthful.
-INTERVIEWER BRAIN: Adapt to the supplied interviewer type. Recruiter = conversational, simple, outcomes. TechOps Engineer = troubleshooting evidence and technical specifics. Hiring Manager = ownership, prioritization, operational impact. Security = identity, least privilege, auditability, safe escalation. Leadership = business impact, scale, automation, cost/risk.
-ADAPTIVE COACHING: If RESUME MATCH is Direct and the topic/domain has already been demonstrated, keep SAY THIS extremely lean (often 1-2 sentences). If the domain is new or RESUME MATCH is General bridge, give 2-3 sentences and stronger technical backup. Deep mode can be longer.
-INTERVIEW INTELLIGENCE: Prefer fresh resume stories. Avoid repeating metrics/stories unless explicitly revisited. Use the selected story when provided. Never fabricate failure/conflict details that are absent from the resume.
-TROUBLESHOOTING: scope -> impact -> evidence -> isolate -> safest useful fix -> verify.
-BEHAVIORAL: context -> action -> reasoning -> result, compactly.
-OUTPUT EXACTLY: begin with the candidate's spoken answer, no heading. Then on its own line <<<DETAILS_JSON>>> then one compact JSON object: {"thoughtProcess":"short string","testing":"short string","technical":["max 5 short points"],"followUp":"short string","stopHere":true}. No markdown fences or text after JSON.`;
+IQVIA — Clinical Data Management Analyst — Jul 2018-Jun 2020
+Supported Phase II/III clinical data management using EDC, eCOA, safety, laboratory and vendor systems. Reviewed protocols, CRFs, schedules, DMPs, edit checks and study procedures. Performed data review, query tracking, reconciliation and database QC. Reconciled patient-reported/vendor data against expected subject, visit and assessment schedules. Investigated missing, late, duplicated and inconsistent assessment data. Supported EDC configuration review, UAT, defect documentation, validation evidence and database release preparation.
 
-const LUNA='openai/gpt-5.6-luna-fast',SOL='openai/gpt-5.6-sol-fast',FREE='minimax/minimax-m2.7-free';
-function chooseModel(depth){if(process.env.VOICE_COACH_MODEL)return process.env.VOICE_COACH_MODEL;return depth==='deep'?SOL:LUNA}
-async function gateway({token,model,question,depth,recentContext,story,match,type}){const used=usedIds(recentContext);const domains=STORIES.filter(s=>used.includes(s.id)).map(s=>s.domain);const strengths=[...new Set(STORIES.filter(s=>used.includes(s.id)).flatMap(s=>s.strengths))];const prompt=['Target role: Kustomer TechOps',`Interviewer type: ${type}`,`Requested depth: ${depth}`,`RESUME MATCH: ${match.level} — ${match.label}`,`USED STORIES: ${used.join(', ')||'none'}`,`COVERED DOMAINS: ${domains.join(', ')||'none'}`,`COVERED STRENGTHS: ${strengths.join(', ')||'none'}`,story?`SELECTED STORY: ${story.label}\nAlready used: ${story.reused?'yes':'no'}\nResume facts: ${story.facts}`:'SELECTED STORY: none',compactContext(recentContext)?`Recent conversation:\n${compactContext(recentContext)}`:'',`Newest interviewer input: ${question}`].filter(Boolean).join('\n\n');return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({model,stream:true,max_tokens:depth==='deep'?420:260,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})})}
+ENABLEMENT: Developed role-based eCOA curriculum covering protocol interpretation, requirements, solution design, build review, UAT, release readiness, risk and customer consultation. Trained/mentored 30+ implementation professionals via workshops, build simulations, quality reviews, shadowing and coaching.
 
-module.exports=async function handler(req,res){
- if(req.method!=='POST')return res.status(405).send('Method not allowed');
- const{question,depth='simple',recentContext=[]}=req.body||{};if(!question||typeof question!=='string')return res.status(400).send('Question is required');
- const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;if(!token)return res.status(500).send('AI_GATEWAY_API_KEY is missing from this deployment.');
- const story=pickStory(question,recentContext),match=resumeMatch(question,story),type=interviewerType(question),chosen=chooseModel(depth),models=[...new Set([chosen,chosen===SOL?LUNA:null,FREE].filter(Boolean))];
- try{let upstream=null,tier=null,selected=null,last='No AI model available',status=502;for(const model of models){const a=await gateway({token,model,question,depth,recentContext,story,match,type});if(a.ok){upstream=a;selected=model;tier=model===SOL?'Sol Fast':model===LUNA?'Luna Fast':model.includes('-free')?'Free fallback':'Custom';break}status=a.status;const txt=await a.text();try{const p=JSON.parse(txt);last=p?.error?.message||p?.message||txt}catch{last=txt||last}}if(!upstream)return res.status(status).send(last);
- res.statusCode=200;res.setHeader('Content-Type','text/plain; charset=utf-8');res.setHeader('Cache-Control','no-cache, no-transform');res.setHeader('X-Accel-Buffering','no');res.setHeader('X-Voice-Model',selected);res.setHeader('X-Voice-Tier',`${tier} | ${type} | Resume ${match.level}`);res.setHeader('X-Interviewer-Type',type);res.setHeader('X-Resume-Match',match.level);if(story){res.setHeader('X-Resume-Story',story.id);res.setHeader('X-Story-Fresh',story.reused?'no':'yes')}
- const reader=upstream.body.getReader(),decoder=new TextDecoder();let buffer='';while(true){const{done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()||'';for(const raw of lines){const line=raw.trim();if(!line.startsWith('data:'))continue;const payload=line.slice(5).trim();if(!payload||payload==='[DONE]')continue;try{const j=JSON.parse(payload),d=j?.choices?.[0]?.delta?.content;if(typeof d==='string'&&d)res.write(d)}catch{}}}res.end();
- }catch(e){console.error('Voice Coach stream error:',e);if(!res.headersSent)return res.status(500).send(e?.message||'Streaming response failed');res.end()}
+REGULATED PRACTICES: GCP, 21 CFR Part 11, audit trails, computerized-system validation, data integrity, controlled documentation, SOPs, work instructions, change control, inspection readiness.
+TOOLS LISTED: Excel, PowerPoint, Word, SharePoint, Teams, Jira, Confluence, requirements repositories and defect-management platforms.
+
+TRUTH RULE: Never invent work experience, employers, projects, metrics, incidents, tools, or direct Medidata product experience that is not stated above. If asked about a Medidata-specific product feature not established by the resume, say the direct product experience is not established and bridge from adjacent eCOA/EDC experience. Never claim Patient Cloud or Rave hands-on experience unless the interviewer explicitly frames it as a hypothetical.`;
+
+const SYSTEM = `You are Ricardo's real-time Voice Coach for the Medidata Senior Implementation Consultant – Enablement interview.
+
+${RESUME}
+
+PRIMARY STYLE
+Answer like an experienced senior consultant who has done this work repeatedly, but explain it simply. The answer must sound spoken, practical, calm, and natural — not like a textbook or corporate script.
+
+Use this mental flow when useful:
+Understand clinical intent -> clarify requirement -> identify risk/dependencies -> act -> verify/test -> document/communicate.
+
+Rules:
+- Start with what Ricardo would actually look at or do first.
+- Explain why, but do not dump every possible detail.
+- Show senior judgment around protocol alignment, patient usability, data integrity, traceability, risk, stakeholder impact, validation, and adoption.
+- Use resume terminology naturally.
+- First-pass answers should be complete enough to avoid basic follow-ups, while leaving room for a deeper probe.
+- Recruiter answers: 2-4 natural sentences.
+- Technical answers: usually 3-5 concise sentences.
+- Scenarios: usually 4-6 concise sentences.
+- Behavioral answers must use only resume-supported facts. Do not fabricate a specific incident.
+- If a question asks for an example but the resume supports only a recurring responsibility, frame it as a representative example, not a claimed historical event.
+- When relevant, use metrics naturally: 30+ studies; 25 countries; 20 languages; ~15,000 planned participants; 30+ professionals mentored; 78%->91% first-cycle acceptance; 32% fewer recurring defects; 20% shorter UAT; 95% on-time launches.
+
+HIGH-PRIORITY TECHNICAL PATTERNS
+1) Protocol -> eCOA design: clinical intent/endpoint/SoA -> who/what/when -> schedule/windows/reminders/branching/roles/translations/scoring/devices/data flow -> traceability -> UAT.
+2) Build review: approved requirements vs configuration, then real patient/site journey end-to-end.
+3) UAT: risk-based, scenario-based; normal flow plus missed assessments, wrong timing, permissions, notifications, translations, device behavior, errors and downstream data integrity.
+4) Reminder after completion: confirm submission/time/status -> review reminder rule/config -> reproduce -> configuration vs product issue -> evidence/impact.
+5) Live protocol amendment: impact assessment first; check assessments, schedules, translations, devices, data transfers, requirements, validation, training, documentation, existing subjects and production timing.
+6) Validated instrument: licensing, approved electronic version, wording, response options, translations, scoring, formatting and permitted modifications.
+7) EDC/downstream mismatch: determine whether expected -> compare subject/visit/assessment IDs -> isolate source vs transfer vs mapping vs downstream processing -> reconcile.
+8) Defect triage: reproduce -> expected vs actual -> evidence -> affected users/studies -> clinical/operational impact -> severity/workaround -> escalation.
+9) Mentoring: identify gap (product knowledge, protocol interpretation, process, consultation, confidence) -> coach reasoning -> practice -> verify transfer. Repeated team-wide error = enablement/process gap.
+10) Client request you disagree with: clarify underlying goal -> explain risk/tradeoffs -> recommend better option -> document informed decision -> implement/test if approved and allowed.
+
+HIGH-RISK UAT EXAMPLE
+Right patient -> right assessment -> right time/visit -> right role -> right downstream data. Example: a Week 8 assessment must appear at Week 8, not Week 4/12, not to the wrong user; completion must be recorded and transferred correctly. Wrong timing/recipient can affect data integrity and endpoint interpretation.
+
+RECRUITER STORY
+Career progression: IQVIA clinical-data foundation -> Clario end-to-end eCOA implementation -> Signant senior implementation, enablement, mentoring, release/product work.
+Why Medidata/Enablement: broader impact through consultant development, customer adoption, implementation quality, product feedback and Patient Experience work.
+Why leave: positive progression toward a role where enablement, mentoring, adoption and implementation strategy are central.
+
+OUTPUT FORMAT — EXACT
+Start immediately with the candidate's spoken answer. No heading.
+Then output this delimiter on its own line:
+<<<DETAILS_JSON>>>
+Then one compact JSON object only:
+{"thoughtProcess":"short string","testing":"short string","technical":["max 5 short points"],"followUp":"short likely follow-up question","stopHere":true}
+No markdown fences and no text after the JSON.`;
+
+const LUNA = 'openai/gpt-5.6-luna-fast';
+const SOL = 'openai/gpt-5.6-sol-fast';
+const FREE = 'minimax/minimax-m2.7-free';
+
+function chooseModel(depth) {
+  if (process.env.VOICE_COACH_MODEL) return process.env.VOICE_COACH_MODEL;
+  return depth === 'deep' ? SOL : LUNA;
+}
+
+function compactContext(c) {
+  if (!Array.isArray(c)) return '';
+  return c.slice(-6).map((x, i) =>
+    `${i + 1}. Interviewer: ${String(x?.question || '').slice(0, 450)}\nCandidate: ${String(x?.answer || '').slice(0, 600)}`
+  ).join('\n');
+}
+
+function interviewerType(q) {
+  const t = q.toLowerCase();
+  if (/tell me about yourself|walk me through your background|why medidata|why this role|why are you leaving|salary|compensation|availability|hybrid|motivat|next role/.test(t)) return 'Recruiter';
+  if (/mentor|training|enablement|adoption|trusted advisor|stakeholder|process improvement|sop|work instruction|leadership|client/.test(t)) return 'Enablement / Hiring Manager';
+  if (/release|defect|enhancement|product|engineering|roadmap/.test(t)) return 'Product / Operations';
+  if (/protocol|ecoa|epro|ediary|clinro|obsro|perfo|uat|validated instrument|assessment|branching|reminder|translation|edc|data flow|reconciliation|part 11|gcp|validation/.test(t)) return 'eCOA Technical';
+  return 'Senior Consultant';
+}
+
+async function gateway({ token, model, question, depth, recentContext, type }) {
+  const depthRule = depth === 'technical'
+    ? 'Give enough clinical/eCOA detail to prove competence, while keeping the spoken answer simple.'
+    : depth === 'deep'
+      ? 'Go one level deeper into implementation reasoning, risk, data flow, validation and tradeoffs.'
+      : 'Give the concise experienced first-pass answer. Simple means clear, not shallow.';
+
+  const prompt = [
+    'Target role: Medidata Senior Implementation Consultant – Enablement',
+    `Interviewer type: ${type}`,
+    `Requested depth: ${depth}`,
+    depthRule,
+    compactContext(recentContext) ? `Recent interview conversation:\n${compactContext(recentContext)}` : '',
+    `Newest interviewer input:\n${question}`
+  ].filter(Boolean).join('\n\n');
+
+  return fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model,
+      stream: true,
+      max_tokens: depth === 'deep' ? 520 : 340,
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: prompt }
+      ]
+    })
+  });
+}
+
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).send('Method not allowed');
+
+  const { question, depth = 'simple', recentContext = [] } = req.body || {};
+  if (!question || typeof question !== 'string') return res.status(400).send('Question is required');
+
+  const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+  if (!token) return res.status(500).send('AI_GATEWAY_API_KEY is missing from this deployment.');
+
+  const type = interviewerType(question);
+  const chosen = chooseModel(depth);
+  const models = [...new Set([chosen, chosen === SOL ? LUNA : null, FREE].filter(Boolean))];
+
+  try {
+    let upstream = null;
+    let tier = null;
+    let selected = null;
+    let last = 'No AI model available';
+    let status = 502;
+
+    for (const model of models) {
+      const attempt = await gateway({ token, model, question, depth, recentContext, type });
+      if (attempt.ok) {
+        upstream = attempt;
+        selected = model;
+        tier = model === SOL ? 'Sol Fast' : model === LUNA ? 'Luna Fast' : model.includes('-free') ? 'Free fallback' : 'Custom';
+        break;
+      }
+      status = attempt.status;
+      const txt = await attempt.text();
+      try {
+        const parsed = JSON.parse(txt);
+        last = parsed?.error?.message || parsed?.message || txt;
+      } catch {
+        last = txt || last;
+      }
+    }
+
+    if (!upstream) return res.status(status).send(last);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('X-Voice-Model', selected);
+    res.setHeader('X-Voice-Tier', `${tier} | ${type} | Medidata Enablement`);
+    res.setHeader('X-Interviewer-Type', type);
+
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line.startsWith('data:')) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === '[DONE]') continue;
+        try {
+          const json = JSON.parse(payload);
+          const delta = json?.choices?.[0]?.delta?.content;
+          if (typeof delta === 'string' && delta) res.write(delta);
+        } catch {}
+      }
+    }
+
+    res.end();
+  } catch (e) {
+    console.error('Medidata Voice Coach stream error:', e);
+    if (!res.headersSent) return res.status(500).send(e?.message || 'Streaming response failed');
+    res.end();
+  }
 };
