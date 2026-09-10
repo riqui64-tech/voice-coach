@@ -58,14 +58,18 @@ ${RESUME}
 GOAL: Give the fastest useful spoken answer that sounds like an experienced systems administrator while staying strictly truthful to the resume.
 
 VOICE / EXPLANATION RULE — VERY IMPORTANT:
-- Think like a strong systems administrator, but explain like an experienced coworker talking to another competent coworker.
-- Never sound like a certification textbook, training manual, glossary, or vendor documentation.
-- Use simple words first. Introduce technical terms only when they help the interviewer understand the decision.
+- Speak peer-to-peer, like two systems administrators who have both done this work for years.
+- Think like a strong systems administrator and explain in plain, operational language.
+- Never sound like a certification textbook, training manual, glossary, vendor documentation, or someone teaching a beginner.
+- Do not define common technologies unless the interviewer specifically asks for a definition.
 - Lead with what you would check or do first and why.
 - Show judgment, sequence, and tradeoffs rather than dumping facts.
 - Prefer concrete operational language: "I’d first confirm whether it’s one user or broader" instead of abstract theory.
-- If a command or protocol matters, mention it only after the troubleshooting logic is clear.
-- Sound like someone who has handled real tickets, incidents, users, systems, and escalations.
+- Assume the interviewer understands normal IT terminology; do not over-explain basics.
+- If the question requires technical depth, BE TECHNICAL. Include the relevant commands, ports, logs, services, dependencies, permissions, policies, paths, or protocol details that would actually help troubleshoot or administer the system.
+- Technical depth must not change the voice: keep it direct, simple, practical, and peer-to-peer.
+- Explain what a technical detail tells you and how it changes your next move; do not list commands just to sound technical.
+- Sound like someone describing how they actually work on a ticket, incident, server, endpoint, identity issue, or escalation.
 - Do not over-explain once the answer is strong. Leave room for follow-up.
 
 SYSTEMS ADMIN MINDSET:
@@ -96,7 +100,7 @@ ANSWER LENGTH:
 - Normal technical question: 2-4 sentences.
 - Scenario question: 3-5 concise sentences.
 - Behavioral question: compact context -> action -> reasoning -> result using only resume facts.
-- Deep mode may go longer, but stay structured.
+- Deep mode may go longer, but stay structured and conversational.
 
 OUTPUT EXACTLY: begin with the candidate's spoken answer, no heading. Then on its own line <<<DETAILS_JSON>>> then one compact JSON object: {"thoughtProcess":"short string","testing":"short string","technical":["max 5 short points"],"followUp":"short string","stopHere":true}. No markdown fences or text after JSON.`;
 
@@ -104,5 +108,5 @@ const LUNA='openai/gpt-5.6-luna',SOL='openai/gpt-5.6-sol',FALLBACK='openai/gpt-5
 function chooseModel(depth){if(process.env.VOICE_COACH_MODEL)return process.env.VOICE_COACH_MODEL;return depth==='deep'?SOL:LUNA}
 function compactContext(c){return Array.isArray(c)?c.slice(-6).map((x,i)=>`${i+1}. Interviewer: ${String(x?.question||'').slice(0,500)}\nCandidate: ${String(x?.answer||'').slice(0,650)}`).join('\n'):''}
 function interviewerType(q){const t=q.toLowerCase();if(/tell me about yourself|walk me through your background|why d\.?\s?e\.?\s?shaw|why this role|salary|availability|motivat/.test(t))return'Recruiter';if(/security|least privilege|audit|mfa|conditional access|phishing|endpoint protection|risk|compliance/.test(t))return'Security';if(/urgent|priority|executive|trade|time-sensitive|restore|incident|outage|escalat|on-call/.test(t))return'Operations';return'Systems Engineer'}
-async function gateway({token,model,question,depth,recentContext,type}){const prompt=['Target role: D. E. Shaw Systems Administrator',`Interviewer type: ${type}`,`Requested depth: ${depth}`,compactContext(recentContext)?`Recent conversation:\n${compactContext(recentContext)}`:'',`Newest interviewer input:\n${question}`].filter(Boolean).join('\n\n');return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({model,stream:true,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})})}
+async function gateway({token,model,question,depth,recentContext,type}){const depthRule=depth==='technical'?'Technical mode: include the technical detail needed to prove competence, but keep the same experienced peer-to-peer voice and plain wording.':depth==='deep'?'Deep mode: reason further, include meaningful technical detail and tradeoffs, but still speak like an experienced admin talking to another experienced admin.':'Turbo simple: be concise and operational. If the question itself is technical, still include the key technical details needed for a correct answer; simple means clear and short, not shallow.';const prompt=['Target role: D. E. Shaw Systems Administrator',`Interviewer type: ${type}`,`Requested depth: ${depth}`,depthRule,compactContext(recentContext)?`Recent conversation:\n${compactContext(recentContext)}`:'',`Newest interviewer input:\n${question}`].filter(Boolean).join('\n\n');return fetch('https://ai-gateway.vercel.sh/v1/chat/completions',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({model,stream:true,messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})})}
 module.exports=async function handler(req,res){if(req.method!=='POST')return res.status(405).send('Method not allowed');const{question,depth='simple',recentContext=[]}=req.body||{};if(!question||typeof question!=='string')return res.status(400).send('Question is required');const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;if(!token)return res.status(500).send('AI_GATEWAY_API_KEY is missing from this deployment.');const type=interviewerType(question),chosen=chooseModel(depth),models=[...new Set([chosen,chosen===SOL?LUNA:null,FALLBACK].filter(Boolean))];try{let upstream=null,tier=null,selected=null,last='No AI model available',status=502;for(const model of models){const a=await gateway({token,model,question,depth,recentContext,type});if(a.ok){upstream=a;selected=model;tier=model===SOL?'Sol':model===LUNA?'Luna':model===FALLBACK?'GPT-5.4 fallback':'Custom';break}status=a.status;const txt=await a.text();try{const p=JSON.parse(txt);last=p?.error?.message||p?.message||txt}catch{last=txt||last}}if(!upstream)return res.status(status).send(last);res.statusCode=200;res.setHeader('Content-Type','text/plain; charset=utf-8');res.setHeader('Cache-Control','no-cache, no-transform');res.setHeader('X-Accel-Buffering','no');res.setHeader('X-Voice-Model',selected);res.setHeader('X-Voice-Tier',`${tier} | ${type} | DE Shaw Systems Admin`);res.setHeader('X-Interviewer-Type',type);const reader=upstream.body.getReader(),decoder=new TextDecoder();let buffer='';while(true){const{done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()||'';for(const raw of lines){const line=raw.trim();if(!line.startsWith('data:'))continue;const payload=line.slice(5).trim();if(!payload||payload==='[DONE]')continue;try{const j=JSON.parse(payload),d=j?.choices?.[0]?.delta?.content;if(typeof d==='string'&&d)res.write(d)}catch{}}}res.end()}catch(e){console.error('DE Shaw Voice Coach stream error:',e);if(!res.headersSent)return res.status(500).send(e?.message||'Streaming response failed');res.end()}};
